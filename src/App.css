@@ -53,13 +53,13 @@ main{
   flex: 1;
   overflow-y: auto;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
   position: relative;
 
   background-color: aquamarine;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.356);
 }
 
 .teste{
@@ -154,4 +154,72 @@ main{
 
   background-color: #333;
   color: white;
+}
+
+.createPost-container{
+  width: 60%;
+  padding: 15px;
+
+  background-color: white;
+  border-radius: 15px;
+}
+
+.user-avatar{
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info{
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+  padding: 10px;
+  font-weight: bolder;
+}
+
+.post-input-area{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 10px;
+  gap: 5px;
+}
+
+.post-input{
+  width: 90%;
+  height: 75px;
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e0e0e0bb;
+}
+
+.post-btn{
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+}
+
+.format-icons{
+  padding-left: 20px;
+
+  display: flex;
+  gap: 10px;
+
+  font-size: 18pt;
+}
+
+.f-icon{
+  cursor: pointer;
+  padding: 5px;
+  transition: 100ms ease-in-out;
+}
+.f-icon:hover{
+  background-color: #c4c4c4bb;
+  border-radius: 50%;
 }
