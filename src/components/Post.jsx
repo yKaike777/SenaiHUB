@@ -129,7 +129,7 @@ function Post({ post, onDeleted }) {
 
       {/* Cabeçalho: UserInfo + menu de 3 pontos */}
       <div className="post-header">
-        <UserInfo user={postAuthor} date={post.createdAt} />
+        <UserInfo user={postAuthor} date={post.createdAt} userId={post.authorId} />
 
         {isAuthor && (
           <div className="post-menu-wrap" ref={menuRef}>

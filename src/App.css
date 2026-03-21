@@ -95,6 +95,7 @@ main {
   height: 100%;
   overflow-y: auto;
   position: relative;
+  gap: 5px;
 }
 
 .Aside h1 {
@@ -1914,4 +1915,199 @@ main {
 
 .course-delete-cancel:hover {
   background: #e0e0e0;
+}
+
+/* ── PERFIL PÚBLICO / ABAS ───────────────────────────── */
+
+.profile-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 10pt;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 0;
+  transition: color 150ms;
+  align-self: flex-start;
+}
+
+.profile-back-btn:hover {
+  color: var(--orange);
+}
+
+.profile-btn-follow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 20px;
+  background: var(--orange);
+  color: white;
+  font-size: 9.5pt;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: 150ms;
+}
+
+.profile-btn-follow:hover:not(:disabled) {
+  background: var(--orange-dark);
+}
+
+.profile-btn-follow:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-btn-unfollow {
+  background: var(--orange-soft);
+  color: var(--orange);
+  border: 1.5px solid var(--orange);
+}
+
+.profile-btn-unfollow:hover:not(:disabled) {
+  background: #fde0d0;
+}
+
+.profile-stat-clickable {
+  cursor: pointer;
+  transition: box-shadow 150ms, transform 150ms;
+}
+
+.profile-stat-clickable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.profile-stat-active {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(243, 112, 33, 0.2);
+}
+
+.profile-stat-active .profile-stat-label {
+  color: var(--orange);
+}
+
+.profile-follow-list-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.profile-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-tab {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  background: none;
+  font-size: 10.5pt;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 150ms, border-bottom 150ms;
+  border-bottom: 2px solid transparent;
+}
+
+.profile-tab:hover {
+  color: var(--text-1);
+}
+
+.profile-tab-active {
+  color: var(--orange);
+  border-bottom: 2px solid var(--orange);
+  font-weight: 700;
+}
+
+.follow-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.follow-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms;
+}
+
+.follow-item:last-child {
+  border-bottom: none;
+}
+
+.follow-item:hover {
+  background: var(--orange-soft);
+}
+
+.follow-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.follow-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.follow-name {
+  font-weight: 600;
+  font-size: 10.5pt;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follow-course {
+  font-size: 9pt;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follow-list-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 10pt;
+}
+
+/* ── USER INFO CLICÁVEL ──────────────────────────────── */
+
+.user-avatar-clickable {
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+
+.user-avatar-clickable:hover {
+  opacity: 0.85;
+}
+
+.user-name-clickable {
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.user-name-clickable:hover > span:first-child,
+.user-name-clickable:hover {
+  color: var(--orange);
 }

@@ -10,6 +10,7 @@ import AuthPage      from './pages/AuthPage.jsx'
 import Feed          from './pages/Feed.jsx'
 import Configuration from './pages/Configuration.jsx'
 import Profile       from './pages/Profile.jsx'
+import UserProfile   from './pages/UserProfile.jsx'
 import Messages      from './pages/Messages.jsx'
 import Courses       from './pages/Courses.jsx'
 import NotFoundPage  from './pages/NotFoundPage.jsx'
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
     children: [
       { index: true,            element: <Feed /> },
       { path: '/profile',       element: <Profile /> },
+      { path: '/user/:uid',     element: <UserProfile /> },
       { path: '/configuration', element: <Configuration /> },
       { path: '/messages',      element: <Messages /> },
       { path: '/courses',       element: <Courses /> },
