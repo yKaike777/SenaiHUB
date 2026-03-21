@@ -1,10 +1,12 @@
+import { NavLink } from 'react-router-dom'
 
 function Configuration(){
     return(
         <>
-        <div className="content">
-            <h1 className="content-title">Configuration</h1>
-            <div className="teste">Teste</div>
+        <div className="content config">
+            <h1 className="content-title">Configurações</h1>
+            <p className="teste">Área em desenvolvimento, volte mais tarde!</p>
+            <NavLink to={"/"} ><button>Voltar para o feed</button></NavLink>
         </div>  
         </>
     )

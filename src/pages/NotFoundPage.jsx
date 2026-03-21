@@ -2,8 +2,11 @@ import { NavLink } from 'react-router-dom'
 function NotFoundPage(){
     return(
         <>
-            <h1>Page Not Found! ❌</h1>
-            <NavLink to={"/"}>Go back home</NavLink>
+        <div className="notFoundPage">
+            <h1>Página não encontrada! ❌</h1>
+            <NavLink to={"/"}>Voltar para o Feed</NavLink>
+        </div>
+
         </>
     )
 }
