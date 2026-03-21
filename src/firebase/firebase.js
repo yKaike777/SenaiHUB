@@ -3,16 +3,13 @@ import { getFirestore } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
 
-// 🔧 Cole aqui as credenciais do seu projeto Firebase
-// Firebase Console → Project Settings → Your Apps → SDK setup
 const firebaseConfig = {
-  apiKey:            "AIzaSyA3u8lWE4ZEPfcIqiLjrZnNNNnXziL0QIk",
-  authDomain:        "redesocial-59f1d.firebaseapp.com",
-  projectId:         "redesocial-59f1d",
-  storageBucket:     "redesocial-59f1d.firebasestorage.app",
-  messagingSenderId: "141012129729",
-  appId:             "1:141012129729:web:7487f75f9012fd1e258140",
-  measurementId: "G-EZSBHL3S41"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
 const app = initializeApp(firebaseConfig)
