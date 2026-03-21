@@ -3,7 +3,7 @@ function Messages(){
     return(
         <>
         <div className="content">
-            <h1>Messages</h1>
+            <h1 className="content-title">Messages</h1>
         </div>  
         </>
     )

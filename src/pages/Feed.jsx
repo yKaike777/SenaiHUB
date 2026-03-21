@@ -4,8 +4,8 @@ function Feed(){
     return(
         <>
         <div className="content">
-            <h1>Feed</h1>
-            <CreatePost />
+            <h1 className="content-title">Feed</h1>
+            <CreatePost className='CreatePost'/>
         </div>  
         </>
     )

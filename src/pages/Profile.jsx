@@ -3,7 +3,7 @@ function Profile(){
     return(
         <>
         <div className="content">
-            <h1>Profile</h1>
+            <h1 className="content-title">Profile</h1>
         </div>  
         </>
     )

@@ -3,7 +3,7 @@ function Courses(){
     return(
         <>
         <div className="content">
-            <h1>Courses</h1>
+            <h1 className="content-title">Courses</h1>
         </div>  
         </>
     )

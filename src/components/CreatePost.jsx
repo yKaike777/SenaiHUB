@@ -5,19 +5,6 @@ import { FaUnderline } from "react-icons/fa";
 import { FaStrikethrough } from "react-icons/fa";
 
 function CreatePost(){
-
-  function aplicarNegrito() {
-    const selection = window.getSelection();
-
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const strong = document.createElement("strong");
-
-    strong.appendChild(range.extractContents());
-    range.insertNode(strong);
-  }
-
   return(
     <div className="createPost-container">
       <div className="user-info">
@@ -30,21 +17,22 @@ function CreatePost(){
       </div>
 
       <div className="post-input-area">
-        <div
-          className='post-input'
-          contentEditable
-          suppressContentEditableWarning
-        ></div>
+        <input type='text' placeholder='No que você está pensando?' className='post-input' />
+
+
+      </div>
+
+      <div className="button-area">
+        <div className="format-icons">
+          <FaBold className='f-icon bold' />
+          <FaItalic className='f-icon italic'/>
+          <FaUnderline className='f-icon underline'/>
+          <FaStrikethrough className='f-icon strikethrough'/>
+        </div>
 
         <button className='post-btn'>Postar</button>
       </div>
 
-      <div className="format-icons">
-        <FaBold className='f-icon bold' onClick={aplicarNegrito}/>
-        <FaItalic className='f-icon italic'/>
-        <FaUnderline className='f-icon underline'/>
-        <FaStrikethrough className='f-icon strikethrough'/>
-      </div>
     </div>
   )
 }
