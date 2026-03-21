@@ -1642,15 +1642,21 @@ main {
     grid-template-columns: 1fr;
   }
 
-  .messages-layout {
-    flex-direction: column;
+  .contacts-hidden-mobile {
+    display: none;
+  }
+
+  .chat-hidden-mobile {
+    display: none;
+  }
+
+  .chat-back-btn {
+    display: flex;
   }
 
   .contacts-list {
     width: 100%;
-    max-height: 40vh;
     border-right: none;
-    border-bottom: 1px solid var(--border);
   }
 
   .chat-window {
@@ -2240,4 +2246,33 @@ main {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ── CHAT BACK BUTTON ────────────────────────────────── */
+
+.chat-back-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12pt;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 140ms, color 140ms;
+}
+
+.chat-back-btn:hover {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+@media (max-width: 768px) {
+  .chat-back-btn {
+    display: flex;
+  }
 }

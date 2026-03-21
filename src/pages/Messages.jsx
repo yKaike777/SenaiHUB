@@ -1,63 +1,58 @@
 import { useState, useEffect, useRef } from 'react'
-import { FaPaperPlane, FaUserFriends } from 'react-icons/fa'
+import { FaPaperPlane, FaUserFriends, FaArrowLeft, FaComments } from 'react-icons/fa'
 import defaultAvatar from '../assets/default-avatar.jpg'
 import { useAuth } from '../context/AuthContext'
 import { getUsersByIds, sendMessage, subscribeToMessages } from '../firebase'
 
 function Messages() {
-  const { currentUser }               = useAuth()
-  const [contacts, setContacts]       = useState([])
+  const { currentUser }                       = useAuth()
+  const [contacts, setContacts]               = useState([])
   const [loadingContacts, setLoadingContacts] = useState(true)
-  const [selected, setSelected]       = useState(null)
-  const [messages, setMessages]       = useState([])
-  const [input, setInput]             = useState('')
-  const [sending, setSending]         = useState(false)
-  const messagesEndRef                = useRef(null)
-  const unsubscribeRef                = useRef(null)
+  const [selected, setSelected]               = useState(null)
+  const [messages, setMessages]               = useState([])
+  const [input, setInput]                     = useState('')
+  const [sending, setSending]                 = useState(false)
+  // mobile: 'list' mostra contatos, 'chat' mostra a conversa
+  const [mobileView, setMobileView]           = useState('list')
+  const messagesEndRef                        = useRef(null)
+  const unsubscribeRef                        = useRef(null)
 
-  // Carrega os usuários seguidos
   useEffect(() => {
     if (!currentUser) return
     const following = currentUser.following || []
     if (!following.length) { setLoadingContacts(false); return }
 
     getUsersByIds(following)
-      .then(users => {
-        setContacts(users)
-        setSelected(users[0] || null)
-      })
+      .then(users => setContacts(users))
       .catch(console.error)
       .finally(() => setLoadingContacts(false))
   }, [currentUser])
 
-  // Inscreve nas mensagens em tempo real ao trocar de conversa
   useEffect(() => {
     if (!selected || !currentUser) return
-
-    // Cancela a inscrição anterior
     if (unsubscribeRef.current) unsubscribeRef.current()
-
     setMessages([])
-
-    const unsub = subscribeToMessages(
-      currentUser.id,
-      selected.id,
-      setMessages
-    )
+    const unsub = subscribeToMessages(currentUser.id, selected.id, setMessages)
     unsubscribeRef.current = unsub
-
     return () => unsub()
   }, [selected, currentUser])
 
-  // Cancela inscrição ao desmontar
   useEffect(() => {
     return () => { if (unsubscribeRef.current) unsubscribeRef.current() }
   }, [])
 
-  // Scroll automático para a última mensagem
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  function selectContact(contact) {
+    setSelected(contact)
+    setMobileView('chat')
+  }
+
+  function goBackToList() {
+    setMobileView('list')
+  }
 
   async function handleSend() {
     if (!input.trim() || !selected || !currentUser || sending) return
@@ -78,7 +73,6 @@ function Messages() {
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
-  // Última mensagem de cada contato (para mostrar no preview da lista)
   const lastMsgPreview = selected
     ? messages[messages.length - 1]?.content || ''
     : ''
@@ -86,12 +80,14 @@ function Messages() {
   return (
     <div className="messages-layout">
 
-      {/* Lista de contatos */}
-      <aside className="contacts-list">
+      {/* ── LISTA DE CONTATOS ── */}
+      <aside className={`contacts-list ${mobileView === 'chat' ? 'contacts-hidden-mobile' : ''}`}>
         <h2 className="contacts-title">Mensagens</h2>
 
         {loadingContacts && (
-          <p style={{ padding: '16px', color: '#aaa', fontSize: '9.5pt' }}>Carregando...</p>
+          <p style={{ padding: '16px', color: 'var(--text-3)', fontSize: '9.5pt' }}>
+            Carregando...
+          </p>
         )}
 
         {!loadingContacts && contacts.length === 0 && (
@@ -105,7 +101,7 @@ function Messages() {
           <div
             key={contact.id}
             className={`contact-item ${selected?.id === contact.id ? 'contact-active' : ''}`}
-            onClick={() => setSelected(contact)}
+            onClick={() => selectContact(contact)}
           >
             <img
               src={contact.profilePicture || defaultAvatar}
@@ -124,16 +120,26 @@ function Messages() {
         ))}
       </aside>
 
-      {/* Janela de conversa */}
-      <div className="chat-window">
-        {!selected && !loadingContacts ? (
+      {/* ── JANELA DE CONVERSA ── */}
+      <div className={`chat-window ${mobileView === 'list' ? 'chat-hidden-mobile' : ''}`}>
+
+        {/* Sem conversa selecionada */}
+        {!selected && !loadingContacts && (
           <div className="chat-empty">
-            <FaUserFriends style={{ fontSize: '32pt', marginBottom: '12px', opacity: 0.3 }} />
+            <FaComments style={{ fontSize: '32pt', marginBottom: '12px', opacity: 0.2 }} />
             <p>{contacts.length === 0 ? 'Siga alguém para conversar' : 'Selecione uma conversa'}</p>
           </div>
-        ) : selected ? (
+        )}
+
+        {/* Conversa aberta */}
+        {selected && (
           <>
             <div className="chat-header">
+              {/* Seta voltar — só aparece no mobile */}
+              <button className="chat-back-btn" onClick={goBackToList}>
+                <FaArrowLeft />
+              </button>
+
               <img
                 src={selected.profilePicture || defaultAvatar}
                 alt="avatar"
@@ -147,7 +153,7 @@ function Messages() {
 
             <div className="chat-messages">
               {messages.length === 0 && (
-                <p style={{ textAlign: 'center', color: '#ccc', fontSize: '9.5pt', margin: 'auto' }}>
+                <p style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: '9.5pt', margin: 'auto' }}>
                   Comece a conversa!
                 </p>
               )}
@@ -184,7 +190,7 @@ function Messages() {
               </button>
             </div>
           </>
-        ) : null}
+        )}
       </div>
 
     </div>
