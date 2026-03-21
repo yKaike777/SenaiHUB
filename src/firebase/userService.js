@@ -16,12 +16,13 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 
-export async function createUser(uid, { name, email, course = '', location = '' }) {
+export async function createUser(uid, { name, email, course = "", location = "", profilePicture = "" }) {
   const ref = doc(db, 'users', uid)
   await setDoc(ref, {
     name, email, location, course,
-    profilePicture: '', bio: '',
+    profilePicture: profilePicture || "",
     followers: [], following: [],
+    nameLower: name.toLowerCase(),
     postCount: 0,
     createdAt: serverTimestamp(),
   })
@@ -35,6 +36,7 @@ export async function getUser(uid) {
 
 export async function updateUserProfile(uid, fields) {
   const allowed = ['name', 'location', 'bio', 'profilePicture', 'course']
+  if (fields.name) safe.nameLower = fields.name.toLowerCase()
   const safe = Object.fromEntries(
     Object.entries(fields).filter(([key]) => allowed.includes(key))
   )
@@ -79,4 +81,29 @@ export async function getUsersByIds(uids) {
   return snaps
     .filter(s => s.exists())
     .map(s => ({ id: s.id, ...s.data() }))
+}
+
+/**
+ * Pesquisa usuários pelo nome (case-insensitive via prefixo).
+ * Firestore não tem full-text search nativo — usamos o campo nameLower
+ * que é salvo em minúsculas para comparação.
+ * Retorna até 10 resultados, excluindo o próprio usuário.
+ */
+export async function searchUsers(term, currentUid, limitCount = 10) {
+  const lower = term.toLowerCase()
+
+  // Busca por prefixo: nome >= "termo" e < "termo" + caractere alto unicode
+  const q = query(
+    collection(db, 'users'),
+    orderBy('nameLower'),
+    where('nameLower', '>=', lower),
+    where('nameLower', '<',  lower + '\uf8ff'),
+    limit(limitCount + 1)
+  )
+
+  const snap = await getDocs(q)
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(u => u.id !== currentUid)
+    .slice(0, limitCount)
 }

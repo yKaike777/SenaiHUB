@@ -16,6 +16,7 @@ export {
   incrementPostCount,
   getSuggestedUsers,
   getUsersByIds,
+  searchUsers,
 } from './userService'
 
 export {
