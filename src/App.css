@@ -1272,12 +1272,7 @@ main {
   padding: 14px 20px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
+  flex-shrink: 0;
 }
 
 .chat-header-name {
@@ -1678,7 +1673,6 @@ main {
 
   .chat-window {
     flex: 1;
-    position: relative;
   }
 }
 
