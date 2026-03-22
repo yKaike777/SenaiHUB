@@ -260,19 +260,12 @@ function Profile() {
                     onClick={() => navigate(`/user/${user.id}`)}
                     style={{ cursor: 'pointer' }}
                   />
-                  <div
-                    className="follow-info"
-                    onClick={() => navigate(`/user/${user.id}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
+                  <div className="follow-info" onClick={() => navigate(`/user/${user.id}`)} style={{ cursor: 'pointer' }}>
                     <span className="follow-name">{user.name}</span>
                     <span className="follow-course">{user.course}</span>
                   </div>
-                  <button
-                    className={`suggested-btn ${isFollowing ? 'suggested-btn-following' : ''}`}
-                    onClick={() => handleFollowToggle(user)}
-                    disabled={!!pendingFollow[user.id]}
-                  >
+
+                  <button className={`suggested-btn ${isFollowing ? 'suggested-btn-following' : ''}`} onClick={() => handleFollowToggle(user)} disabled={!!pendingFollow[user.id]}>
                     {pendingFollow[user.id] ? '...' : isFollowing ? 'Seguindo' : 'Seguir'}
                   </button>
                 </li>

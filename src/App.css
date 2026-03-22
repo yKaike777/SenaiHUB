@@ -1638,6 +1638,15 @@ main {
     padding: 70px 12px 20px;
   }
 
+  .profile-follow-list-card {
+    overflow: visible;
+  }
+
+  .follow-list {
+    max-height: none;
+    overflow: visible;
+  }
+
   .courses-grid {
     grid-template-columns: 1fr;
   }
@@ -2002,7 +2011,7 @@ main {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .profile-tabs {
@@ -2275,4 +2284,111 @@ main {
   .chat-back-btn {
     display: flex;
   }
+}
+
+/* ── SUGGESTED ITEM CLICÁVEL ─────────────────────────── */
+
+.suggested-item-clickable {
+  cursor: pointer;
+  transition: background 140ms;
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin: -4px;
+}
+
+.suggested-item-clickable:hover {
+  background: var(--orange-soft);
+}
+
+/* ── MENSAGENS NÃO LIDAS ─────────────────────────────── */
+
+.contact-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.contact-unread-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  background: var(--orange);
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+
+.contact-has-unread {
+  background: var(--orange-soft);
+}
+
+.contact-name-bold {
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.contact-last-bold {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.contact-unread-badge {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: var(--orange);
+  color: white;
+  border-radius: 20px;
+  font-size: 8pt;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Animação de entrada para mensagens recebidas */
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bubble-new {
+  animation: bubble-in 200ms ease;
+}
+
+/* ── BADGE DE NOTIFICAÇÃO NO ASIDE ───────────────────── */
+
+.aside-badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: var(--orange);
+  color: white;
+  border-radius: 20px;
+  font-size: 8pt;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: badge-pop 200ms ease;
+}
+
+/* Badge fica branco quando o link está ativo */
+.ativo .aside-badge {
+  background: white;
+  color: var(--orange);
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
 }

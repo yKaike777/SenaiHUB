@@ -2,11 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { FaClock, FaUserGraduate, FaBookOpen, FaPlus, FaTimes, FaCheck, FaTrash } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { getAllCourses, enrollStudent, unenrollStudent, isEnrolled, createCourse, deleteCourse } from '../firebase'
-
-const ADMIN_EMAILS = [
-  'admin@aluno.senai.br',
-  'kaike@aluno.senai.br'
-]
+import { isAdmin as checkAdmin } from '../utils/adminConfig'
 
 const EMPTY_FORM = { name: '', description: '', workLoad: '', thumbnail: '' }
 
@@ -22,7 +18,7 @@ function Courses() {
   const [formError, setFormError]     = useState('')
   const [confirmDelete, setConfirmDelete] = useState(null) // id do curso aguardando confirmação
 
-  const isAdmin = ADMIN_EMAILS.includes(currentUser?.email)
+  const isAdmin = checkAdmin(currentUser?.email)
 
   const loadCourses = useCallback(async () => {
     try {

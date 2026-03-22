@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import defaultAvatar from '../assets/default-avatar.jpg'
 import { useAuth } from '../context/AuthContext'
 import { getSuggestedUsers, followUser, unfollowUser } from '../firebase'
 
 function SuggestedUsers() {
   const { currentUser, setCurrentUser } = useAuth()
-  const [users, setUsers]     = useState([])
-  const [loading, setLoading] = useState(true)
-  const [pending, setPending] = useState({}) // { uid: true } enquanto a ação está em curso
+  const navigate                         = useNavigate()
+  const [users, setUsers]               = useState([])
+  const [loading, setLoading]           = useState(true)
+  const [pending, setPending]           = useState({})
 
   useEffect(() => {
     if (!currentUser) return
@@ -17,13 +19,13 @@ function SuggestedUsers() {
       .finally(() => setLoading(false))
   }, [currentUser])
 
-  async function handleFollow(user) {
+  async function handleFollow(e, user) {
+    e.stopPropagation()
     if (!currentUser || pending[user.id]) return
     setPending(p => ({ ...p, [user.id]: true }))
-
-    const alreadyFollowing = currentUser.following?.includes(user.id)
+    const already = currentUser.following?.includes(user.id)
     try {
-      if (alreadyFollowing) {
+      if (already) {
         await unfollowUser(currentUser.id, user.id)
         setCurrentUser(prev => ({
           ...prev,
@@ -37,7 +39,7 @@ function SuggestedUsers() {
         }))
       }
     } catch (err) {
-      console.error('Erro ao seguir/deixar de seguir:', err)
+      console.error(err)
     } finally {
       setPending(p => ({ ...p, [user.id]: false }))
     }
@@ -46,14 +48,14 @@ function SuggestedUsers() {
   if (loading) return (
     <aside className="suggested-panel">
       <h2 className="suggested-title">Sugeridos para você</h2>
-      <p style={{ color: '#aaa', fontSize: '9pt', padding: '8px 0' }}>Carregando...</p>
+      <p style={{ color: 'var(--text-3)', fontSize: '9pt', padding: '8px 0' }}>Carregando...</p>
     </aside>
   )
 
   if (!users.length) return (
     <aside className="suggested-panel">
       <h2 className="suggested-title">Sugeridos para você</h2>
-      <p style={{ color: '#aaa', fontSize: '9pt', padding: '8px 0' }}>Nenhum usuário por aqui ainda.</p>
+      <p style={{ color: 'var(--text-3)', fontSize: '9pt', padding: '8px 0' }}>Nenhum usuário por aqui ainda.</p>
     </aside>
   )
 
@@ -64,7 +66,11 @@ function SuggestedUsers() {
         {users.map(user => {
           const isFollowing = currentUser?.following?.includes(user.id)
           return (
-            <li key={user.id} className="suggested-item">
+            <li
+              key={user.id}
+              className="suggested-item suggested-item-clickable"
+              onClick={() => navigate(`/user/${user.id}`)}
+            >
               <img
                 src={user.profilePicture || defaultAvatar}
                 alt="avatar"
@@ -76,7 +82,7 @@ function SuggestedUsers() {
               </div>
               <button
                 className={`suggested-btn ${isFollowing ? 'suggested-btn-following' : ''}`}
-                onClick={() => handleFollow(user)}
+                onClick={e => handleFollow(e, user)}
                 disabled={!!pending[user.id]}
               >
                 {pending[user.id] ? '...' : isFollowing ? 'Seguindo' : 'Seguir'}

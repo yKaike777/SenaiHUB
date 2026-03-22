@@ -5,6 +5,8 @@ import defaultAvatar from '../assets/default-avatar.jpg'
 import { useAuth } from '../context/AuthContext'
 import { toggleLike, addComment, subscribeToComments, updatePost, deletePost } from '../firebase'
 
+import { isAdmin as checkAdmin } from '../utils/adminConfig'
+
 function Post({ post, onDeleted }) {
   const { currentUser }           = useAuth()
   const [comments, setComments]   = useState([])
@@ -18,11 +20,12 @@ function Post({ post, onDeleted }) {
   const menuRef                   = useRef(null)
   const editRef                   = useRef(null)
 
-  const liked      = currentUser && post.likes?.[currentUser.id]
-  const likeCount  = post.likeCount || 0
-  const isAuthor   = currentUser?.id === post.authorId
+  const liked    = currentUser && post.likes?.[currentUser.id]
+  const likeCount = post.likeCount || 0
+  const isAuthor  = currentUser?.id === post.authorId
+  const isAdmin   = checkAdmin(currentUser?.email)
+  const canManage = isAuthor || isAdmin
 
-  // Fecha o menu ao clicar fora
   useEffect(() => {
     function handleOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -34,11 +37,9 @@ function Post({ post, onDeleted }) {
     return () => document.removeEventListener('mousedown', handleOutside)
   }, [menuOpen])
 
-  // Foca o editor ao abrir edição
   useEffect(() => {
     if (editing && editRef.current) {
       editRef.current.focus()
-      // Coloca o cursor no final
       const range = document.createRange()
       const sel   = window.getSelection()
       range.selectNodeContents(editRef.current)
@@ -78,42 +79,42 @@ function Post({ post, onDeleted }) {
   function startEdit() {
     setMenuOpen(false)
     setEditing(true)
-    // Preenche o editor com o conteúdo atual
-    setTimeout(() => {
-      if (editRef.current) editRef.current.innerHTML = post.content
-    }, 0)
   }
 
-  function cancelEdit() {
-    setEditing(false)
+  function handleEditRefMount(node) {
+    editRef.current = node
+    if (node && !node.innerHTML) {
+      node.innerHTML = post.content || ''
+    }
   }
+
+  function cancelEdit() { setEditing(false) }
 
   async function handleSaveEdit() {
-    const html = editRef.current?.innerHTML?.trim() || ''
-    const text = editRef.current?.innerText?.trim() || ''
+    const node = editRef.current
+    if (!node) return
+    const html = node.innerHTML?.trim() || ''
+    const text = node.innerText?.trim() || ''
     if (!text) return
     setSaving(true)
     try {
       await updatePost(post.id, html)
       setEditing(false)
     } catch (err) {
-      console.error('Erro ao editar post:', err)
+      console.error('Erro ao salvar edicao:', err)
     } finally {
       setSaving(false)
     }
   }
 
   async function handleDelete() {
-    if (!confirmDelete) {
-      setConfirmDelete(true)
-      return
-    }
+    if (!confirmDelete) { setConfirmDelete(true); return }
     setDeleting(true)
     try {
       await deletePost(post.id)
       onDeleted?.(post.id)
     } catch (err) {
-      console.error('Erro ao excluir post:', err)
+      console.error(err)
       setDeleting(false)
     }
   }
@@ -127,11 +128,10 @@ function Post({ post, onDeleted }) {
   return (
     <div className="post-container">
 
-      {/* Cabeçalho: UserInfo + menu de 3 pontos */}
       <div className="post-header">
         <UserInfo user={postAuthor} date={post.createdAt} userId={post.authorId} />
 
-        {isAuthor && (
+        {canManage && (
           <div className="post-menu-wrap" ref={menuRef}>
             <button
               className="post-menu-btn"
@@ -155,10 +155,7 @@ function Post({ post, onDeleted }) {
                   {deleting ? 'Excluindo...' : confirmDelete ? 'Confirmar exclusão' : 'Excluir'}
                 </button>
                 {confirmDelete && (
-                  <button
-                    className="post-menu-item post-menu-cancel"
-                    onClick={() => setConfirmDelete(false)}
-                  >
+                  <button className="post-menu-item post-menu-cancel" onClick={() => setConfirmDelete(false)}>
                     <FaTimes /> Cancelar
                   </button>
                 )}
@@ -168,20 +165,17 @@ function Post({ post, onDeleted }) {
         )}
       </div>
 
-      {/* Conteúdo — normal ou em edição */}
       {editing ? (
         <div className="post-edit-wrap">
           <div
-            ref={editRef}
+            ref={handleEditRefMount}
             className="post-editor post-editor-edit"
             contentEditable
             suppressContentEditableWarning
             spellCheck
           />
           <div className="post-edit-actions">
-            {post.editedAt && (
-              <span className="post-edited-badge">editado</span>
-            )}
+            {post.editedAt && <span className="post-edited-badge">editado</span>}
             <button className="post-edit-cancel" onClick={cancelEdit} disabled={saving}>
               <FaTimes /> Cancelar
             </button>
@@ -192,17 +186,11 @@ function Post({ post, onDeleted }) {
         </div>
       ) : (
         <div className="post-content-wrap">
-          <div
-            className="post-content"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-          {post.editedAt && (
-            <span className="post-edited-label">editado</span>
-          )}
+          <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+          {post.editedAt && <span className="post-edited-label">editado</span>}
         </div>
       )}
 
-      {/* Ações */}
       <div className="post-actions">
         <button className={`like-btn ${liked ? 'liked' : ''}`} onClick={handleLike}>
           {liked ? <FaHeart /> : <FaRegHeart />}
@@ -215,7 +203,6 @@ function Post({ post, onDeleted }) {
 
       <hr className="post-divider" />
 
-      {/* Comentários */}
       <div className="comments-section">
         {comments.length > 0 && (
           <div className="comments-list">

@@ -2,32 +2,52 @@ import { useState, useEffect, useRef } from 'react'
 import { FaPaperPlane, FaUserFriends, FaArrowLeft, FaComments } from 'react-icons/fa'
 import defaultAvatar from '../assets/default-avatar.jpg'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
 import { getUsersByIds, sendMessage, subscribeToMessages } from '../firebase'
 
 function Messages() {
   const { currentUser }                       = useAuth()
+  const { unread, markAsRead, setOpenConv, clearOpenConv } = useNotifications()
   const [contacts, setContacts]               = useState([])
   const [loadingContacts, setLoadingContacts] = useState(true)
   const [selected, setSelected]               = useState(null)
   const [messages, setMessages]               = useState([])
   const [input, setInput]                     = useState('')
   const [sending, setSending]                 = useState(false)
-  // mobile: 'list' mostra contatos, 'chat' mostra a conversa
   const [mobileView, setMobileView]           = useState('list')
+  const [previews, setPreviews]               = useState({})
   const messagesEndRef                        = useRef(null)
   const unsubscribeRef                        = useRef(null)
+  const previewUnsubs                         = useRef({})
 
   useEffect(() => {
     if (!currentUser) return
     const following = currentUser.following || []
     if (!following.length) { setLoadingContacts(false); return }
-
     getUsersByIds(following)
       .then(users => setContacts(users))
       .catch(console.error)
       .finally(() => setLoadingContacts(false))
   }, [currentUser])
 
+  // Preview da última mensagem de cada contato
+  useEffect(() => {
+    if (!currentUser || !contacts.length) return
+    Object.values(previewUnsubs.current).forEach(fn => fn())
+    previewUnsubs.current = {}
+
+    contacts.forEach(contact => {
+      const unsub = subscribeToMessages(currentUser.id, contact.id, msgs => {
+        if (!msgs.length) return
+        setPreviews(prev => ({ ...prev, [contact.id]: msgs[msgs.length - 1] }))
+      })
+      previewUnsubs.current[contact.id] = unsub
+    })
+
+    return () => Object.values(previewUnsubs.current).forEach(fn => fn())
+  }, [contacts, currentUser])
+
+  // Listener da conversa aberta
   useEffect(() => {
     if (!selected || !currentUser) return
     if (unsubscribeRef.current) unsubscribeRef.current()
@@ -38,7 +58,10 @@ function Messages() {
   }, [selected, currentUser])
 
   useEffect(() => {
-    return () => { if (unsubscribeRef.current) unsubscribeRef.current() }
+    return () => {
+      if (unsubscribeRef.current) unsubscribeRef.current()
+      clearOpenConv()
+    }
   }, [])
 
   useEffect(() => {
@@ -48,10 +71,13 @@ function Messages() {
   function selectContact(contact) {
     setSelected(contact)
     setMobileView('chat')
+    markAsRead(contact.id)   // limpa badge do aside e da lista
+    setOpenConv(contact.id)  // informa o contexto que essa conversa está aberta
   }
 
   function goBackToList() {
     setMobileView('list')
+    clearOpenConv()
   }
 
   async function handleSend() {
@@ -61,7 +87,7 @@ function Messages() {
       await sendMessage(currentUser.id, selected.id, input.trim())
       setInput('')
     } catch (err) {
-      console.error('Erro ao enviar mensagem:', err)
+      console.error(err)
     } finally {
       setSending(false)
     }
@@ -73,10 +99,6 @@ function Messages() {
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
-  const lastMsgPreview = selected
-    ? messages[messages.length - 1]?.content || ''
-    : ''
-
   return (
     <div className="messages-layout">
 
@@ -85,9 +107,7 @@ function Messages() {
         <h2 className="contacts-title">Mensagens</h2>
 
         {loadingContacts && (
-          <p style={{ padding: '16px', color: 'var(--text-3)', fontSize: '9.5pt' }}>
-            Carregando...
-          </p>
+          <p style={{ padding: '16px', color: 'var(--text-3)', fontSize: '9.5pt' }}>Carregando...</p>
         )}
 
         {!loadingContacts && contacts.length === 0 && (
@@ -97,33 +117,50 @@ function Messages() {
           </div>
         )}
 
-        {contacts.map(contact => (
-          <div
-            key={contact.id}
-            className={`contact-item ${selected?.id === contact.id ? 'contact-active' : ''}`}
-            onClick={() => selectContact(contact)}
-          >
-            <img
-              src={contact.profilePicture || defaultAvatar}
-              alt="avatar"
-              className="contact-avatar"
-            />
-            <div className="contact-info">
-              <span className="contact-name">{contact.name}</span>
-              <span className="contact-last">
-                {selected?.id === contact.id && lastMsgPreview
-                  ? lastMsgPreview
-                  : contact.course}
-              </span>
+        {contacts.map(contact => {
+          const count   = unread[contact.id] || 0
+          const preview = previews[contact.id]
+          const hasNew  = count > 0
+
+          return (
+            <div
+              key={contact.id}
+              className={`contact-item ${selected?.id === contact.id ? 'contact-active' : ''} ${hasNew ? 'contact-has-unread' : ''}`}
+              onClick={() => selectContact(contact)}
+            >
+              <div className="contact-avatar-wrap">
+                <img
+                  src={contact.profilePicture || defaultAvatar}
+                  alt="avatar"
+                  className="contact-avatar"
+                />
+                {hasNew && <span className="contact-unread-dot" />}
+              </div>
+              <div className="contact-info">
+                <span className={`contact-name ${hasNew ? 'contact-name-bold' : ''}`}>
+                  {contact.name}
+                </span>
+                <span className={`contact-last ${hasNew ? 'contact-last-bold' : ''}`}>
+                  {preview
+                    ? (preview.senderId === currentUser?.id
+                        ? `Você: ${preview.content}`
+                        : preview.content)
+                    : contact.course}
+                </span>
+              </div>
+              {hasNew && (
+                <span className="contact-unread-badge">
+                  {count > 9 ? '9+' : count}
+                </span>
+              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </aside>
 
       {/* ── JANELA DE CONVERSA ── */}
       <div className={`chat-window ${mobileView === 'list' ? 'chat-hidden-mobile' : ''}`}>
 
-        {/* Sem conversa selecionada */}
         {!selected && !loadingContacts && (
           <div className="chat-empty">
             <FaComments style={{ fontSize: '32pt', marginBottom: '12px', opacity: 0.2 }} />
@@ -131,15 +168,12 @@ function Messages() {
           </div>
         )}
 
-        {/* Conversa aberta */}
         {selected && (
           <>
             <div className="chat-header">
-              {/* Seta voltar — só aparece no mobile */}
               <button className="chat-back-btn" onClick={goBackToList}>
                 <FaArrowLeft />
               </button>
-
               <img
                 src={selected.profilePicture || defaultAvatar}
                 alt="avatar"
@@ -162,7 +196,7 @@ function Messages() {
                   key={msg.id}
                   className={`chat-bubble-wrap ${msg.senderId === currentUser?.id ? 'mine' : 'theirs'}`}
                 >
-                  <div className={`chat-bubble ${msg.senderId === currentUser?.id ? 'bubble-mine' : 'bubble-theirs'}`}>
+                  <div className={`chat-bubble ${msg.senderId === currentUser?.id ? 'bubble-mine' : 'bubble-theirs'} ${msg.senderId !== currentUser?.id ? 'bubble-new' : ''}`}>
                     {msg.content}
                     <span className="bubble-time">{formatTime(msg.createdAt)}</span>
                   </div>
