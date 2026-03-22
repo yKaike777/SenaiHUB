@@ -197,7 +197,7 @@ function Post({ post, onDeleted }) {
           <span>{likeCount} curtida{likeCount !== 1 ? 's' : ''}</span>
         </button>
         <span className="comment-count">
-          <FaRegCommentDots /> {post.commentCount || 0} comentário{post.commentCount !== 1 ? 's' : ''}
+          <FaRegCommentDots /> {comments.length} comentário{comments.length !== 1 ? 's' : ''}
         </span>
       </div>
 
